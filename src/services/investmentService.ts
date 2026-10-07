@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { AGREEMENT_CHARGES, FUND_AMOUNT_MINIMUM } from '../data/fundRequest';
+import { getInvestorPortalSettings } from './portalSettingsService';
 import { Investment, InvestmentStatus } from '../types/investment';
 import { mapInvestmentAmounts } from '../utils/investmentFormat';
 import { processUserInvestmentInterest } from './investmentInterestService';
@@ -74,9 +75,17 @@ function mapInvestmentRow(row: InvestmentRow): Investment {
   };
 }
 
-export function validateFundAmount(amount: number): string | null {
-  if (!amount || amount < FUND_AMOUNT_MINIMUM) {
-    return `Minimum fund amount is ₹${FUND_AMOUNT_MINIMUM.toLocaleString('en-IN')}.`;
+export function validateFundAmount(
+  amount: number,
+  limits?: { min: number; max: number }
+): string | null {
+  const min = limits?.min ?? FUND_AMOUNT_MINIMUM;
+  const max = limits?.max ?? 10000000;
+  if (!amount || amount < min) {
+    return `Minimum fund amount is ₹${min.toLocaleString('en-IN')}.`;
+  }
+  if (amount > max) {
+    return `Maximum fund amount is ₹${max.toLocaleString('en-IN')}.`;
   }
   return null;
 }
@@ -289,7 +298,11 @@ export async function getUserInvestmentTitles(userId: string): Promise<string[]>
 export async function createFundRequest(
   input: CreateFundRequestInput
 ): Promise<Investment> {
-  const amountError = validateFundAmount(input.fundAmount);
+  const settings = await getInvestorPortalSettings();
+  const amountError = validateFundAmount(input.fundAmount, {
+    min: settings.minInvestmentAmount,
+    max: settings.maxInvestmentAmount,
+  });
   if (amountError) {
     throw new Error(amountError);
   }

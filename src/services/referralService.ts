@@ -53,14 +53,16 @@ export function normalizeReferralCodeInput(code: string): string {
   return code.trim().toLowerCase().replace(/\s/g, '');
 }
 
+const SIX_DIGIT_REFERRAL_FORMAT = /^[0-9]{6}$/;
+const LEGACY_NAME_REFERRAL_FORMAT = /^[0-9]{6}[a-z0-9]+$/;
 const LEGACY_REFERRAL_FORMAT = /^[a-z0-9]{8}$/i;
-const NEW_REFERRAL_FORMAT = /^[0-9]{6}[a-z0-9]+$/;
 
 export function isReferralCodeFormatValid(code: string): boolean {
   const normalized = normalizeReferralCodeInput(code);
   if (!normalized) return true;
   return (
-    NEW_REFERRAL_FORMAT.test(normalized) ||
+    SIX_DIGIT_REFERRAL_FORMAT.test(normalized) ||
+    LEGACY_NAME_REFERRAL_FORMAT.test(normalized) ||
     LEGACY_REFERRAL_FORMAT.test(normalized)
   );
 }

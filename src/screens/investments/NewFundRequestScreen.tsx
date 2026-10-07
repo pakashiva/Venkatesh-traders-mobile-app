@@ -19,8 +19,6 @@ import FormCheckbox from '../../components/form/FormCheckbox';
 import PayableInfoBanner from '../../components/form/PayableInfoBanner';
 import { useAuth } from '../../contexts/AuthContext';
 import {
-  FUND_AMOUNT_MINIMUM,
-  getAutoSelectedPaydate,
   formatPayableBreakdown,
 } from '../../data/fundRequest';
 import {
@@ -43,8 +41,13 @@ import {
 } from '../../services/nomineeService';
 import { BankAccount, Nominee } from '../../types/fundRequest';
 import { AddFundsStackScreenProps } from '../../navigation/types';
-import { parseDisplayPaydate } from '../../utils/parsePaydate';
+import {
+  formatFundLimitHint,
+  getInvestorPortalSettings,
+  InvestorPortalSettings,
+} from '../../services/portalSettingsService';
 import { parseInrInput } from '../../utils/currency';
+import { resolveAutoPayout } from '../../utils/payoutCycle';
 import {
   isInvestmentTitleTaken,
   suggestNextInvestmentTitle,
@@ -60,7 +63,9 @@ type Props = AddFundsStackScreenProps<'NewFundRequest'>;
 export default function NewFundRequestScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { session } = useAuth();
-  const autoPaydate = useMemo(() => getAutoSelectedPaydate(), []);
+  const autoPayout = useMemo(() => resolveAutoPayout(), []);
+  const [portalSettings, setPortalSettings] =
+    useState<InvestorPortalSettings | null>(null);
 
   const [fundAmount, setFundAmount] = useState('');
   const [fundTitle, setFundTitle] = useState('Investment 1');
@@ -95,15 +100,17 @@ export default function NewFundRequestScreen({ navigation }: Props) {
     setIsLoadingOptions(true);
 
     try {
-      const [accounts, nomineeList, titles] = await Promise.all([
+      const [accounts, nomineeList, titles, settings] = await Promise.all([
         getUserBankAccounts(userId),
         getUserNominees(userId),
         getUserInvestmentTitles(userId),
+        getInvestorPortalSettings(),
       ]);
       setBankAccounts(accounts);
       setNominees(nomineeList);
       setExistingTitles(titles);
       setFundTitle(suggestNextInvestmentTitle(titles));
+      setPortalSettings(settings);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Failed to load form data.';
@@ -125,7 +132,7 @@ export default function NewFundRequestScreen({ navigation }: Props) {
     }
 
     const normalized = normalizeReferralCodeInput(referralCode);
-    if (!normalized || normalized.length < 7) {
+    if (!normalized || normalized.length < 6) {
       setReferrerName(null);
       return;
     }
@@ -183,7 +190,15 @@ export default function NewFundRequestScreen({ navigation }: Props) {
     }
 
     const amount = parseInrInput(fundAmount);
-    const amountError = validateFundAmount(amount);
+    const amountError = validateFundAmount(
+      amount,
+      portalSettings
+        ? {
+            min: portalSettings.minInvestmentAmount,
+            max: portalSettings.maxInvestmentAmount,
+          }
+        : undefined
+    );
     if (amountError) {
       Alert.alert('Invalid amount', amountError);
       return;
@@ -243,15 +258,13 @@ export default function NewFundRequestScreen({ navigation }: Props) {
         return;
       }
 
-      const payDate = parseDisplayPaydate(autoPaydate);
-
       await createFundRequest({
         userId,
         title,
         fundAmount: amount,
         bankAccountId,
         nomineeId,
-        payDate,
+        payDate: autoPayout.payDateIso,
         referralCode: hasReferralCode
           ? normalizeReferralCodeInput(referralCode)
           : undefined,
@@ -323,7 +336,11 @@ export default function NewFundRequestScreen({ navigation }: Props) {
             label="Fund Amount (in ₹)"
             required
             placeholder="e.g. 1,00,000"
-            hint={`Minimum fund is ₹${FUND_AMOUNT_MINIMUM.toLocaleString('en-IN')}`}
+            hint={
+              portalSettings
+                ? formatFundLimitHint(portalSettings)
+                : 'Loading investment limits...'
+            }
             value={fundAmount}
             onChangeText={setFundAmount}
             keyboardType="numeric"
@@ -336,14 +353,14 @@ export default function NewFundRequestScreen({ navigation }: Props) {
               <Ionicons name="calendar-outline" size={15} color={colors.textPrimary} />
             }
             placeholder="Choose a date"
-            value={autoPaydate}
-            options={[{ id: autoPaydate, label: autoPaydate }]}
+            value={autoPayout.label}
+            options={[{ id: autoPayout.label, label: autoPayout.label }]}
             onChange={() => {}}
             editable={false}
           />
           <Text style={styles.paydateHint}>
-            Auto-set to one month from today. If that day does not exist next
-            month, payout moves to the 1st of the following month.
+            Auto-set to the next payout day (1st, 5th, 10th, 15th, 20th, or
+            25th). Admin can change this when approving the request.
           </Text>
 
           <FormSelectField

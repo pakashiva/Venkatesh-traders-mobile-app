@@ -272,6 +272,13 @@ export default function CreateWithdrawalRequestScreen({ navigation }: Props) {
           return;
         }
         withdrawalAmount = activeInvestment.withdrawalAmount;
+        if (!withdrawalAmount || withdrawalAmount <= 0) {
+          Alert.alert(
+            'Invalid amount',
+            'Withdrawal amount must be greater than zero.'
+          );
+          return;
+        }
       }
 
       const ownsBank = await verifyBankAccountOwnership(userId, bankId);

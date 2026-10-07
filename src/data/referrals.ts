@@ -3,7 +3,7 @@ export const REFERRAL_STEPS = [
     step: '1',
     title: 'Share Your Referral Code',
     description:
-      'Copy your unique 8-character referral code and share it with your network.',
+      'Copy your unique 6-digit referral code and share it with your network.',
   },
   {
     step: '2',

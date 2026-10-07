@@ -219,6 +219,30 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocument> = {
   },
 };
 
-export function getLegalDocument(id: LegalDocumentId): LegalDocument {
-  return LEGAL_DOCUMENTS[id];
+export function getLegalDocument(
+  id: LegalDocumentId,
+  contacts?: { supportEmail?: string; supportPhone?: string }
+): LegalDocument {
+  const document = LEGAL_DOCUMENTS[id];
+  if (!contacts?.supportEmail && !contacts?.supportPhone) {
+    return document;
+  }
+
+  const email = contacts.supportEmail?.trim();
+  const phone = contacts.supportPhone?.trim();
+  const replace = (text: string) => {
+    let next = text;
+    if (email) next = next.split(supportEmail).join(email);
+    if (phone) next = next.split(supportPhone).join(phone);
+    return next;
+  };
+
+  return {
+    ...document,
+    sections: document.sections.map((section) => ({
+      ...section,
+      paragraphs: section.paragraphs.map(replace),
+      bullets: section.bullets?.map(replace),
+    })),
+  };
 }

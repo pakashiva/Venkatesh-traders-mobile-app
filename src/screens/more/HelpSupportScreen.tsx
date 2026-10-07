@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,14 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   HELP_SUPPORT_CONTACTS,
   HELP_SUPPORT_HOURS,
+  HelpContactItem,
 } from '../../data/helpSupport';
+import { getInvestorPortalSettings } from '../../services/portalSettingsService';
 import { BRAND_LOGO_MARK } from '../../constants/brandAssets';
 import { MoreStackScreenProps } from '../../navigation/types';
 import { colors, spacing } from '../../theme/colors';
@@ -23,6 +26,27 @@ type Props = MoreStackScreenProps<'HelpSupport'>;
 
 export default function HelpSupportScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const [contacts, setContacts] = useState<HelpContactItem[]>(
+    HELP_SUPPORT_CONTACTS
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      void getInvestorPortalSettings().then((settings) => {
+        setContacts(
+          HELP_SUPPORT_CONTACTS.map((item) => {
+            if (item.id === 'email') {
+              return { ...item, value: settings.supportEmail };
+            }
+            if (item.id === 'phone') {
+              return { ...item, value: settings.supportPhone };
+            }
+            return item;
+          })
+        );
+      });
+    }, [])
+  );
 
   const handleContactPress = async (
     action: 'phone' | 'email' | 'none',
@@ -90,7 +114,7 @@ export default function HelpSupportScreen({ navigation }: Props) {
         </View>
 
         <Text style={styles.sectionHeading}>CONTACT DETAILS</Text>
-        {HELP_SUPPORT_CONTACTS.map((item) => {
+        {contacts.map((item) => {
           const isInteractive = item.action !== 'none';
 
           return (

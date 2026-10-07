@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInputProps,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { authColors } from '../../theme/authColors';
 
 type Props = {
@@ -39,8 +40,14 @@ export default function PasswordInput({
           style={styles.toggle}
           activeOpacity={0.7}
           onPress={() => setVisible((prev) => !prev)}
+          accessibilityRole="button"
+          accessibilityLabel={visible ? 'Hide password' : 'Show password'}
         >
-          <View style={styles.toggleDot} />
+          <Ionicons
+            name={visible ? 'eye-off-outline' : 'eye-outline'}
+            size={20}
+            color={authColors.textDark}
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -78,18 +85,10 @@ const styles = StyleSheet.create({
   },
   toggle: {
     position: 'absolute',
-    right: 12,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#C5CAD3',
+    right: 10,
+    width: 32,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  toggleDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#FFFFFF',
   },
 });

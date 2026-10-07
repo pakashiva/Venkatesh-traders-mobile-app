@@ -205,6 +205,8 @@ export type Database = {
           bank_account_id: string;
           nominee_id: string;
           pay_date: string;
+          payout_day: number | null;
+          payout_day_overridden: boolean;
           referral_code: string | null;
           referrer_user_id: string | null;
           agreement_charges: number;
@@ -234,6 +236,8 @@ export type Database = {
           bank_account_id: string;
           nominee_id: string;
           pay_date: string;
+          payout_day?: number | null;
+          payout_day_overridden?: boolean;
           referral_code?: string | null;
           referrer_user_id?: string | null;
           agreement_charges?: number;
@@ -455,6 +459,10 @@ export type Database = {
       verify_own_mpin: {
         Args: { p_mpin: string };
         Returns: boolean;
+      };
+      get_investor_portal_settings: {
+        Args: Record<string, never>;
+        Returns: Json;
       };
       get_my_referral_code: {
         Args: Record<string, never>;

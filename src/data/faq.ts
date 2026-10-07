@@ -60,7 +60,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: 'investments-1',
         question: 'What is the minimum investment amount?',
         answer:
-          'The minimum fund amount is ₹1,00,000 per investment. Agreement charges of ₹1,000 are added separately when you submit a new fund request.',
+          'The minimum and maximum fund amount are set by the company and shown on the new fund request screen. Agreement charges of ₹1,000 are added separately when you submit a new fund request.',
       },
       {
         id: 'investments-2',
@@ -196,7 +196,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         id: 'referrals-1',
         question: 'How does the referral program work?',
         answer:
-          'Share your unique referral code from More → Referrals (6 digits followed by your name, for example 482913rahulsharma). When someone invests using your code and their fund becomes Active, you earn a referral bonus on their investment amount.',
+          'Share your unique 6-digit referral code from More → Referrals. When someone invests using your code and their fund becomes Active, you earn a referral bonus on their investment amount.',
       },
       {
         id: 'referrals-2',

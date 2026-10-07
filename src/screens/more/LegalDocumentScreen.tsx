@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getLegalDocument } from '../../data/legalDocuments';
+import { getInvestorPortalSettings } from '../../services/portalSettingsService';
 import { MoreStackScreenProps } from '../../navigation/types';
 import { colors, spacing } from '../../theme/colors';
 
@@ -16,7 +18,22 @@ type Props = MoreStackScreenProps<'LegalDocument'>;
 
 export default function LegalDocumentScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
-  const document = getLegalDocument(route.params.documentId);
+  const [supportEmail, setSupportEmail] = useState<string | undefined>();
+  const [supportPhone, setSupportPhone] = useState<string | undefined>();
+
+  useFocusEffect(
+    useCallback(() => {
+      void getInvestorPortalSettings().then((settings) => {
+        setSupportEmail(settings.supportEmail);
+        setSupportPhone(settings.supportPhone);
+      });
+    }, [])
+  );
+
+  const document = getLegalDocument(route.params.documentId, {
+    supportEmail,
+    supportPhone,
+  });
 
   return (
     <View style={[styles.safe, { paddingTop: insets.top }]}>
