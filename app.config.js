@@ -19,6 +19,7 @@ module.exports = {
 
     android: {
       package: 'com.pakashiva.mobileapp',
+      softwareKeyboardLayoutMode: 'resize',
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',
