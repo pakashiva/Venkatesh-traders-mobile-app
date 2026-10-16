@@ -15,6 +15,7 @@ module.exports = {
 
     ios: {
       supportsTablet: true,
+      bundleIdentifier: 'com.pakashiva.mobileapp',
     },
 
     android: {

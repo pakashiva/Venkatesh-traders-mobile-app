@@ -159,9 +159,12 @@ export default function CreateAccountScreen({ navigation }: Props) {
             label="Mobile Number"
             required
             value={form.mobileNumber}
-            onChangeText={(text) => updateField('mobileNumber', text)}
+            onChangeText={(text) =>
+              updateField('mobileNumber', text.replace(/\D/g, '').slice(0, 10))
+            }
             error={errors.mobileNumber}
             keyboardType="phone-pad"
+            maxLength={10}
           />
           <RegistrationTextField
             label="Email Address"
@@ -199,18 +202,24 @@ export default function CreateAccountScreen({ navigation }: Props) {
             label="Aadhaar Card Number"
             required
             value={form.aadhaarNumber}
-            onChangeText={(text) => updateField('aadhaarNumber', text)}
+            onChangeText={(text) =>
+              updateField('aadhaarNumber', text.replace(/\D/g, '').slice(0, 12))
+            }
             error={errors.aadhaarNumber}
             keyboardType="number-pad"
+            maxLength={12}
           />
 
           <RegistrationTextField
             label="PAN Card Number"
             required
             value={form.panNumber}
-            onChangeText={(text) => updateField('panNumber', text.toUpperCase())}
+            onChangeText={(text) =>
+              updateField('panNumber', text.replace(/[^a-z\d]/gi, '').toUpperCase().slice(0, 10))
+            }
             error={errors.panNumber}
             autoCapitalize="characters"
+            maxLength={10}
           />
 
           <RegistrationSectionHeader
@@ -236,6 +245,7 @@ export default function CreateAccountScreen({ navigation }: Props) {
             }
             error={errors.accountNumber}
             keyboardType="number-pad"
+            maxLength={18}
           />
           <RegistrationTextField
             label="Confirm Account Number"
@@ -246,13 +256,14 @@ export default function CreateAccountScreen({ navigation }: Props) {
             }
             error={errors.confirmAccountNumber}
             keyboardType="number-pad"
+            maxLength={18}
           />
           <RegistrationTextField
             label="IFSC Code"
             required
             value={form.ifscCode}
             onChangeText={(text) => {
-              const nextIfsc = text.toUpperCase();
+              const nextIfsc = text.replace(/[^a-z\d]/gi, '').toUpperCase().slice(0, 11);
               const detectedBank = detectBankNameFromIfsc(nextIfsc);
               setForm((prev) => ({
                 ...prev,
@@ -276,6 +287,7 @@ export default function CreateAccountScreen({ navigation }: Props) {
             }}
             error={errors.ifscCode}
             autoCapitalize="characters"
+            maxLength={11}
           />
 
           <AccountTypeSelector
@@ -333,27 +345,34 @@ export default function CreateAccountScreen({ navigation }: Props) {
             label="Nominee Aadhaar Number"
             required
             value={form.nomineeAadhaar}
-            onChangeText={(text) => updateField('nomineeAadhaar', text)}
+            onChangeText={(text) =>
+              updateField('nomineeAadhaar', text.replace(/\D/g, '').slice(0, 12))
+            }
             error={errors.nomineeAadhaar}
             keyboardType="number-pad"
+            maxLength={12}
           />
           <RegistrationTextField
             label="Nominee's Mobile"
             required
             value={form.nomineeMobile}
-            onChangeText={(text) => updateField('nomineeMobile', text)}
+            onChangeText={(text) =>
+              updateField('nomineeMobile', text.replace(/\D/g, '').slice(0, 10))
+            }
             error={errors.nomineeMobile}
             keyboardType="phone-pad"
+            maxLength={10}
           />
           <RegistrationTextField
             label="Nominee's PAN"
             required
             value={form.nomineePan}
             onChangeText={(text) =>
-              updateField('nomineePan', text.toUpperCase())
+              updateField('nomineePan', text.replace(/[^a-z\d]/gi, '').toUpperCase().slice(0, 10))
             }
             error={errors.nomineePan}
             autoCapitalize="characters"
+            maxLength={10}
           />
 
           <RegistrationSectionHeader
